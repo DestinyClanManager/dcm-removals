@@ -71,7 +71,7 @@ module.exports.addRemovalToHistory = (event, context, callback) => {
         const response = {
           statusCode: 201,
           headers: { 'Access-Control-Allow-Origin': '*' },
-          body: newRemoval
+          body: JSON.stringify(newRemoval)
         }
 
         callback(null, response)
