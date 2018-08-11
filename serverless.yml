@@ -10,22 +10,22 @@ service: dcm-removals
 # The `provider` block defines where your service will be deployed
 provider:
   name: aws
-  runtime: nodejs6.10
+  runtime: nodejs8.10
   stage: dev
   region: us-east-1
   environment:
     REMOVALS_TABLE: dcm_removals_${opt:stage, self:provider.stage}
 
   iamRoleStatements:
-  - Effect: Allow
-    Action:
-      - dynamodb:Query
-      - dynamodb:Scan
-      - dynamodb:GetItem
-      - dynamodb:PutItem
-      - dynamodb:UpdateItem
-      - dynamodb:DeleteItem
-    Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.REMOVALS_TABLE}"
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource: 'arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.REMOVALS_TABLE}'
 
 # The `functions` block defines what code to deploy
 functions:
@@ -53,6 +53,18 @@ functions:
               paths:
                 clanId: true
 
+  addRemovalsToHistory:
+    handler: handler.addRemovalsToHistory
+    events:
+      - http:
+          path: removal/{clanId}/batch
+          method: post
+          cors: true
+          request:
+            parameters:
+              paths:
+                clanId: true
+
 resources:
   Resources:
     DestinyClanManagerRemovalHistoryTable:
@@ -60,12 +72,10 @@ resources:
       DeletionPolicy: Retain
       Properties:
         AttributeDefinitions:
-          -
-            AttributeName: id
+          - AttributeName: id
             AttributeType: S
         KeySchema:
-          -
-            AttributeName: id
+          - AttributeName: id
             KeyType: HASH
         ProvisionedThroughput:
           ReadCapacityUnits: 1
