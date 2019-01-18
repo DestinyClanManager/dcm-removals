@@ -11,5 +11,13 @@
   "license": "ISC",
   "dependencies": {
     "uuid": "^3.2.1"
+  },
+  "devDependencies": {
+    "dotenv": "^6.2.0",
+    "jest": "^23.6.0",
+    "jest-trx-results-processor": "0.0.7",
+    "request": "^2.88.0",
+    "serverless": "^1.36.1",
+    "testdouble": "^3.9.3"
   }
 }

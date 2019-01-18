@@ -30,7 +30,7 @@ provider:
 # The `functions` block defines what code to deploy
 functions:
   getRemovalHistory:
-    handler: handler.getRemovalHistory
+    handler: src/handler.getRemovalHistory
     events:
       - http:
           path: removal/{clanId}
@@ -42,7 +42,7 @@ functions:
                 clanId: true
 
   addRemovalToHistory:
-    handler: handler.addRemovalToHistory
+    handler: src/handler.addRemovalToHistory
     events:
       - http:
           path: removal/{clanId}
@@ -54,7 +54,7 @@ functions:
                 clanId: true
 
   addRemovalsToHistory:
-    handler: handler.addRemovalsToHistory
+    handler: src/handler.addRemovalsToHistory
     events:
       - http:
           path: removal/{clanId}/batch
