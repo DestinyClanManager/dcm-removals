@@ -1,40 +1,30 @@
 const AWS = require('aws-sdk')
 const uuid = require('uuid/v4')
 const dynamoDb = new AWS.DynamoDB.DocumentClient()
+const removalService = require('./services/removal-service')
 
 function handleError(error, callback) {
   callback(error, {
     statusCode: 500,
-    headers: {
-      'Access-Control-Allow-Origin': '*'
-    }
+    body: JSON.stringify(error)
   })
 }
 
-module.exports.getRemovalHistory = async function(event, context, callback) {
-  const clanId = event.pathParameters.clanId
-  const query = {
-    TableName: process.env.REMOVALS_TABLE,
-    Key: { id: clanId }
-  }
+module.exports.getRemovalHistory = async function(event, _context, callback) {
+  const { clanId } = event.pathParameters
 
-  let result
+  let clanRemovalHistory
   try {
-    result = await dynamoDb.get(query).promise()
+    clanRemovalHistory = await removalService.getClanRemovalHistory(clanId)
   } catch (error) {
     console.error(error)
     handleError(error, callback)
+    return
   }
 
   const response = {
     statusCode: 200,
-    headers: { 'Access-Control-Allow-Origin': '*' }
-  }
-
-  if (!result.Item) {
-    response.body = '[]'
-  } else {
-    response.body = JSON.stringify(result.Item.removals)
+    body: JSON.stringify(clanRemovalHistory)
   }
 
   callback(null, response)
