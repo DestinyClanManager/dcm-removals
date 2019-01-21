@@ -2,7 +2,7 @@
   "name": "dcm-removals",
   "version": "1.0.0",
   "description": "",
-  "main": "handler.js",
+  "main": "src/handler.js",
   "scripts": {
     "test": "npm run test:unit && npm run test:integration",
     "test:unit": "jest --config test/unit/jest.unit.config.js --coverage",
@@ -10,7 +10,7 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "private": true,
   "dependencies": {
     "uuid": "^3.2.1"
   },
