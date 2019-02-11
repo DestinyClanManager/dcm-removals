@@ -30,73 +30,22 @@ module.exports.getRemovalHistory = async function(event, _context, callback) {
   callback(null, response)
 }
 
-module.exports.addRemovalToHistory = async (event, context, callback) => {
-  const clanId = event.pathParameters.clanId
-  const newRemoval = JSON.parse(event.body)
+module.exports.addRemovalToHistory = async (event, _context, callback) => {
+  const { clanId } = event.pathParameters
+  const removal = JSON.parse(event.body)
 
-  newRemoval.id = uuid()
-
-  const query = {
-    TableName: process.env.REMOVALS_TABLE,
-    Key: { id: clanId }
-  }
-
-  let result
+  let createdRemoval
   try {
-    result = await dynamoDb.get(query).promise()
+    createdRemoval = await removalService.addRemovalToHistory(clanId, removal)
   } catch (error) {
     console.error(error)
     handleError(error, callback)
-  }
-
-  if (!result.Item) {
-    const createProfileQuery = {
-      TableName: process.env.REMOVALS_TABLE,
-      Item: {
-        id: clanId,
-        removals: [newRemoval]
-      }
-    }
-
-    try {
-      await dynamoDb.put(createProfileQuery).promise()
-    } catch (error) {
-      console.error(error)
-      handleError(error, callback)
-    }
-
-    const response = {
-      statusCode: 201,
-      headers: { 'Access-Control-Allow-Origin': '*' },
-      body: JSON.stringify(newRemoval)
-    }
-
-    callback(null, response)
     return
-  }
-
-  const history = result.Item.removals
-  history.push(newRemoval)
-
-  const saveQuery = {
-    TableName: process.env.REMOVALS_TABLE,
-    Item: {
-      id: `${clanId}`,
-      removals: history
-    }
-  }
-
-  try {
-    await dynamoDb.put(saveQuery).promise()
-  } catch (error) {
-    console.error(error)
-    handleError(error, callback)
   }
 
   const response = {
     statusCode: 201,
-    headers: { 'Access-Control-Allow-Origin': '*' },
-    body: JSON.stringify(newRemoval)
+    body: JSON.stringify(createdRemoval)
   }
 
   callback(null, response)

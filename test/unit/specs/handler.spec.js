@@ -46,4 +46,58 @@ describe('handler', () => {
       })
     })
   })
+
+  describe('addRemovalToHistory', () => {
+    describe('when everything goes ok', () => {
+      beforeEach(async () => {
+        const removal = {
+          gamertag: 'removed-member'
+        }
+        event.body = JSON.stringify(removal)
+
+        td.when(removalService.addRemovalToHistory('clan-id', removal)).thenResolve({
+          gamertag: 'removed-member',
+          id: 'generated-id'
+        })
+
+        await subject.addRemovalToHistory(event, null, callback)
+      })
+
+      it('responds with the added removal', () => {
+        const expectedResponse = {
+          statusCode: 201,
+          body: JSON.stringify({
+            gamertag: 'removed-member',
+            id: 'generated-id'
+          })
+        }
+        td.verify(callback(null, expectedResponse))
+      })
+    })
+
+    describe('when there is an error', () => {
+      let error
+
+      beforeEach(async () => {
+        const removal = {
+          gamertag: 'removed-member'
+        }
+        event.body = JSON.stringify(removal)
+
+        error = new Error('oh no')
+
+        td.when(removalService.addRemovalToHistory('clan-id', removal)).thenReject(error)
+
+        await subject.addRemovalToHistory(event, null, callback)
+      })
+
+      it('responds with an error response', () => {
+        const expectedResponse = {
+          statusCode: 500,
+          body: JSON.stringify(error)
+        }
+        td.verify(callback(error, expectedResponse))
+      })
+    })
+  })
 })
