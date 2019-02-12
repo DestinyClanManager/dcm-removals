@@ -15,6 +15,7 @@ provider:
   region: us-east-1
   environment:
     REMOVALS_TABLE: dcm_removals_${opt:stage, self:provider.stage}
+    ENABLE_LOGGING: true
 
   iamRoleStatements:
     - Effect: Allow

@@ -32,4 +32,17 @@ describe('removal service', () => {
       expect(actual).toEqual('removal-with-id')
     })
   })
+
+  describe('addRemovalsToHistory', () => {
+    let actual
+
+    beforeEach(async () => {
+      td.when(removalRepository.saveAll('clan-id', 'removals')).thenResolve('removals-with-ids')
+      actual = await subject.addRemovalsToHistory('clan-id', 'removals')
+    })
+
+    it('returns the added removals', () => {
+      expect(actual).toEqual('removals-with-ids')
+    })
+  })
 })

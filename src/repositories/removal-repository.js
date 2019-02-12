@@ -36,3 +36,29 @@ module.exports.save = async (clanId, removal) => {
 
   return removal
 }
+
+module.exports.saveAll = async (clanId, removals) => {
+  const db = dbProvider.getInstance()
+  const getQuery = {
+    TableName: process.env.REMOVALS_TABLE,
+    Key: { id: clanId }
+  }
+
+  const result = await db.get(getQuery).promise()
+
+  removals.forEach(r => (r.id = uuid()))
+
+  const removalHistory = !result.Item ? removals : [...result.Item.removals, ...removals]
+
+  const putQuery = {
+    TableName: process.env.REMOVALS_TABLE,
+    Item: {
+      id: clanId,
+      removals: removalHistory
+    }
+  }
+
+  await db.put(putQuery).promise()
+
+  return removals
+}

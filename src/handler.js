@@ -1,9 +1,10 @@
-const AWS = require('aws-sdk')
-const uuid = require('uuid/v4')
-const dynamoDb = new AWS.DynamoDB.DocumentClient()
 const removalService = require('./services/removal-service')
 
 function handleError(error, callback) {
+  if (process.env.ENABLE_LOGGING === true || process.env.ENABLE_LOGGING === 'true') {
+    console.error(error)
+  }
+
   callback(error, {
     statusCode: 500,
     body: JSON.stringify(error)
@@ -17,7 +18,6 @@ module.exports.getRemovalHistory = async function(event, _context, callback) {
   try {
     clanRemovalHistory = await removalService.getClanRemovalHistory(clanId)
   } catch (error) {
-    console.error(error)
     handleError(error, callback)
     return
   }
@@ -38,7 +38,6 @@ module.exports.addRemovalToHistory = async (event, _context, callback) => {
   try {
     createdRemoval = await removalService.addRemovalToHistory(clanId, removal)
   } catch (error) {
-    console.error(error)
     handleError(error, callback)
     return
   }
@@ -51,74 +50,21 @@ module.exports.addRemovalToHistory = async (event, _context, callback) => {
   callback(null, response)
 }
 
-module.exports.addRemovalsToHistory = async (event, context, callback) => {
-  const clanId = event.pathParameters.clanId
-  const newRemovals = JSON.parse(event.body)
+module.exports.addRemovalsToHistory = async (event, _context, callback) => {
+  const { clanId } = event.pathParameters
+  const removals = JSON.parse(event.body)
 
-  newRemovals.forEach(removal => {
-    removal.id = uuid()
-  })
-
-  const query = {
-    TableName: process.env.REMOVALS_TABLE,
-    Key: { id: clanId }
-  }
-
-  let result
+  let createdRemovals
   try {
-    result = await dynamoDb.get(query).promise()
+    createdRemovals = await removalService.addRemovalsToHistory(clanId, removals)
   } catch (error) {
-    console.error(error)
     handleError(error, callback)
-  }
-
-  if (!result.Item) {
-    const createProfileQuery = {
-      TableName: process.env.REMOVALS_TABLE,
-      Item: {
-        id: clanId,
-        removals: newRemovals
-      }
-    }
-
-    try {
-      await dynamoDb.put(createProfileQuery).promise()
-    } catch (error) {
-      console.error(error)
-      handleError(error, callback)
-    }
-
-    const response = {
-      statusCode: 201,
-      headers: { 'Access-Control-Allow-Origin': '*' },
-      body: JSON.stringify(newRemoval)
-    }
-
-    callback(null, response)
     return
-  }
-
-  const history = result.Item.removals
-
-  const saveQuery = {
-    TableName: process.env.REMOVALS_TABLE,
-    Item: {
-      id: `${clanId}`,
-      removals: history.concat(newRemovals)
-    }
-  }
-
-  try {
-    await dynamoDb.put(saveQuery).promise()
-  } catch (error) {
-    console.error(error)
-    handleError(error, callback)
   }
 
   const response = {
     statusCode: 201,
-    headers: { 'Access-Control-Allow-Origin': '*' },
-    body: JSON.stringify(newRemovals)
+    body: JSON.stringify(createdRemovals)
   }
 
   callback(null, response)
