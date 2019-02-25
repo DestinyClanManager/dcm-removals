@@ -8,29 +8,62 @@ describe('removal repository', () => {
   })
 
   describe('findAllByClanId', () => {
-    let actual, get
+    let actual, get, promise
 
-    beforeEach(async () => {
-      const promise = td.func()
+    beforeEach(() => {
+      promise = td.func()
       get = td.func()
 
       td.when(get(td.matchers.anything())).thenReturn({ promise })
-      td.when(promise()).thenResolve('removed-members')
-      td.when(dbProvider.getInstance()).thenReturn({ get })
-
-      actual = await subject.findAllByClanId('clan-id')
     })
 
-    it('creates the correct query', () => {
-      const expectedQuery = {
-        TableName: 'removals_table',
-        Key: { id: 'clan-id' }
-      }
-      td.verify(get(expectedQuery))
+    describe('when the clan has removed members', () => {
+      beforeEach(async () => {
+        const removedMembersForClan = {
+          Item: {
+            id: 'clan-id',
+            removals: 'removed-members'
+          }
+        }
+
+        td.when(promise()).thenResolve(removedMembersForClan)
+        td.when(dbProvider.getInstance()).thenReturn({ get })
+
+        actual = await subject.findAllByClanId('clan-id')
+      })
+
+      it('creates the correct query', () => {
+        const expectedQuery = {
+          TableName: 'removals_table',
+          Key: { id: 'clan-id' }
+        }
+        td.verify(get(expectedQuery))
+      })
+
+      it('returns the removed members', () => {
+        expect(actual).toEqual('removed-members')
+      })
     })
 
-    it('returns the removed members', () => {
-      expect(actual).toEqual('removed-members')
+    describe('when the clan has not removed members', () => {
+      beforeEach(async () => {
+        td.when(promise()).thenResolve({})
+        td.when(dbProvider.getInstance()).thenReturn({ get })
+
+        actual = await subject.findAllByClanId('clan-id')
+      })
+
+      it('creates the correct query', () => {
+        const expectedQuery = {
+          TableName: 'removals_table',
+          Key: { id: 'clan-id' }
+        }
+        td.verify(get(expectedQuery))
+      })
+
+      it('returns the removed members', () => {
+        expect(actual).toEqual([])
+      })
     })
   })
 

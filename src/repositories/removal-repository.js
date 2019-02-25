@@ -8,7 +8,12 @@ module.exports.findAllByClanId = async clanId => {
     Key: { id: clanId }
   }
 
-  return await db.get(query).promise()
+  const result = await db.get(query).promise()
+  if (!result.Item) {
+    return []
+  }
+
+  return result.Item.removals
 }
 
 module.exports.save = async (clanId, removal) => {
