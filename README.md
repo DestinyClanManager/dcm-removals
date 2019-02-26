@@ -1,5 +1,8 @@
 # dcm-removals
 
+[![Build status](https://dev.azure.com/heymrcarter/Destiny%20Clan%20Manager/_apis/build/status/DCM-Removals)](https://dev.azure.com/heymrcarter/Destiny%20Clan%20Manager/_build/latest?definitionId=-1)
+![Deployment status](https://vsrm.dev.azure.com/heymrcarter/_apis/public/Release/badge/7e5f3784-dda9-4bf0-9c99-7bde292990b9/8/22)
+
 > Removal history microservice for Destiny Clan Manager
 
 ## Endpoints
