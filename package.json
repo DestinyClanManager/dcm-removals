@@ -19,7 +19,7 @@
     "jest": "^24.8.0",
     "jest-trx-results-processor": "0.0.7",
     "request": "^2.88.0",
-    "serverless": "^1.44.1",
+    "serverless": "^1.83.3",
     "supertest": "^3.4.2",
     "testdouble": "^3.9.3",
     "testdouble-jest": "^2.0.0",
